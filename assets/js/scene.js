@@ -319,7 +319,7 @@
     let playing = false, phase = 0, last = 0, rafId = 0, visible = true, hk = 1, ns = 1, narrow = false;
     let listHTML = '';
     const list = opts.notesList || null;
-    let lastR = null;
+    let lastR = null, lastW = 0;
 
     const fix = () => model.clamp(state);
 
@@ -330,10 +330,16 @@
         const next = clamp(560 / w, 1, 2);
         const nextNs = clamp(620 / w, 1, 1.4);
         const nextNarrow = !!list && w < 560;
-        if (Math.abs(next - hk) > 0.02 || Math.abs(nextNs - ns) > 0.02 || nextNarrow !== narrow) {
-          hk = next; ns = nextNs; narrow = nextNarrow; ctx.narrow = narrow;
+        if (Math.abs(next - hk) > 0.02 || Math.abs(nextNs - ns) > 0.02 || nextNarrow !== narrow || (narrow && Math.abs(w - lastW) > 2)) {
+          hk = next; ns = nextNs; narrow = nextNarrow; ctx.narrow = narrow; lastW = w;
           // на телефоне кадр ближе к человеку
           vb = narrow && model.mobileViewBox ? model.mobileViewBox : model.viewBox;
+          if (narrow) {
+            // сверху — полоса под кнопку «Подсказки», чтобы она не закрывала ручки и рисунок
+            const [x, y, vw, vh] = vb.split(/\s+/).map(Number);
+            const pad = 56 * (vw / w);
+            vb = `${x} ${Math.round(y - pad)} ${vw} ${Math.round(vh + pad)}`;
+          }
           if (svg.getAttribute('viewBox') !== vb) svg.setAttribute('viewBox', vb);
           svg.style.setProperty('--ns', ns.toFixed(2));
           schedule();

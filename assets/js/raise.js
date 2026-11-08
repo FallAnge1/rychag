@@ -120,7 +120,7 @@
     view: VIEW,
     viewBox: '0 0 1000 724',
     miniViewBox: '120 60 760 660',
-    mobileViewBox: '150 110 700 880',
+    mobileViewBox: '120 110 770 880',
     period: 3,
     initial: () => ({ th: 70 * DEG, phi: 15 * DEG }),
     clamp(st) { st.th = clamp(st.th, 0, TH_MAX); st.phi = clamp(st.phi, 0, PHI_MAX); },

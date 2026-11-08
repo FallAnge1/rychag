@@ -16,7 +16,7 @@
 
   const VIEW = makeView(330, 300, 500);
   const CH = { x: 650, y: 400, w: 320, h: 190 };
-  const CHM = { x: 150, y: 800, w: 520, h: 160 };                 // график под фигурой на телефоне
+  const CHM = { x: 150, y: 830, w: 520, h: 160 };                 // график под фигурой на телефоне
   const box = (ctx) => (ctx && ctx.narrow ? CHM : CH);
 
   const udir = (al) => v(Math.sin(al), -Math.cos(al));
@@ -126,7 +126,7 @@
     view: VIEW,
     viewBox: '0 0 1000 724',
     miniViewBox: '60 -20 640 720',
-    mobileViewBox: '130 -40 560 1000',
+    mobileViewBox: '130 -40 560 1070',
     period: 2.6,
     initial: () => ({ al: 5 * DEG, th: 80 * DEG }),
     clamp(st) { st.al = clamp(st.al, AL_MIN, AL_MAX); st.th = clamp(st.th, TH_MIN, TH_MAX); },

@@ -231,6 +231,7 @@
   const model = {
     view: VIEW,
     viewBox: '0 -34 1000 724',
+    mobileViewBox: '0 -110 1000 800',
     miniViewBox: '30 -70 960 770',
     period: 3.2,
     initial() {

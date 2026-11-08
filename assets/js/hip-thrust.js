@@ -86,12 +86,12 @@
     out += D.muscleEll(comb(H, [nT, -0.07], [dT, -0.02]), 0.11, 0.08, dT, 'mu-m2', r.gI, uid);
     out += D.bones([[H, S], [H, K], [K, A]]) + D.joints([H, K]) + D.joints([A], 5);
     if (!mini) {
-      out += D.ln(v(B.x, 0.3), v(B.x, FLOOR), 'fline') + D.ln(r.F, comb(r.F, [r.Rdir, 1.05]), 'fline');
+      out += D.ln(v(B.x, 0.3), v(B.x, FLOOR), 'fline') + D.ln(r.F, comb(r.F, [r.Rdir, 0.92]), 'fline');
       out += D.lever(H, B, v(0, 1), H.x - B.x, 'm2', { labelOff: -0.05 });
       out += D.lever(K, r.F, r.Rdir, Math.abs(r.armK), r.Mk >= 0 ? 'm1' : 'm3', { labelOff: -0.05 });
     }
     // стрелка — твой толчок стопами в пол
-    out += D.arrow(comb(r.F, [r.Rdir, 0.98]), comb(r.F, [r.Rdir, 0.74]), 'ar-force', 7);
+    out += D.arrow(comb(r.F, [r.Rdir, 0.83]), comb(r.F, [r.Rdir, 0.6]), 'ar-force', 7);
     out += D.arrow(comb(bar, [v(0, 1), 0.02]), comb(bar, [v(0, -1), 0.28]), 'ar-force', 6);
     const k = 0.26 / (r.total);
     out += D.arrow(v(B.x, -0.035 - 0.05 - r.RB * k), v(B.x, -0.045), 'ar-react', 6);
@@ -102,7 +102,7 @@
   const hp = {
     hip: (r) => add(r.H, v(0.02, -0.15)),
     feet: (r) => v(r.A.x + 0.28, FLOOR + 0.05),
-    push: (r) => comb(r.F, [r.Rdir, 1.03]),
+    push: (r) => comb(r.F, [r.Rdir, 0.88]),
   };
   const pushText = (phi) => (phi > 4 * DEG ? 'пятки тянешь к себе' : phi < -4 * DEG ? 'стопы толкаешь от себя' : 'давишь прямо в пол');
 
@@ -145,7 +145,7 @@
     view: VIEW,
     viewBox: '0 -10 1000 724',
     miniViewBox: '60 120 900 560',
-    mobileViewBox: '0 100 880 590',
+    mobileViewBox: '0 120 930 620',
     period: 2.8,
     initial: () => ({ th: 2 * DEG, xf: 0.72, phi: 0 }),
     clamp(st) {
