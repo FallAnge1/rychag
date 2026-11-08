@@ -6,6 +6,8 @@
   const ex = window.EXERCISES[document.body.dataset.exercise];
   const { page } = ex;
   const svg = $('scene');
+  const slug = document.body.dataset.exercise;
+  const track = (goal, extra) => (window.track || (() => {}))(goal, { exercise: slug, ...extra });
 
   const penList = $('penNotes');
   // Пометки сами прячутся, как только человек начинает двигать модель
@@ -13,6 +15,7 @@
   const autoHide = () => {
     if (autoHidden) return;
     autoHidden = true;
+    track('interact');                       // человек начал двигать модель
     if (!svg.classList.contains('notes-off')) setNotes(true);
   };
   const api = window.Scene.mount(svg, ex.model, { interactive: true, notesList: penList, onInteract: autoHide });
@@ -35,6 +38,7 @@
     const off = !svg.classList.contains('notes-off');
     setNotes(off);
     store.set(off);
+    track('notes_toggle', { notes: off ? 'off' : 'on' });
   });
 
   // ── Ползунок ────────────────────────────────────────────────────
@@ -55,7 +59,7 @@
   // ── Повторения ──────────────────────────────────────────────────
   const playBtn = $('play');
   playBtn.addEventListener('click', () => {
-    api.playing ? api.pause() : api.play();
+    api.playing ? api.pause() : (api.play(), track('play'));
     playBtn.setAttribute('aria-pressed', String(api.playing));
   });
 
@@ -66,7 +70,7 @@
     b.type = 'button';
     b.className = 'chip' + (p.c ? ' c-' + p.c : '');
     b.textContent = p.label;
-    b.addEventListener('click', () => api.set({ ...p.state }));
+    b.addEventListener('click', () => { api.set({ ...p.state }); track('preset', { preset: p.label }); });
     presets.appendChild(b);
   }
 

@@ -18,6 +18,7 @@
   btn.addEventListener('click', () => {
     const next = root.dataset.theme === 'light' ? 'dark' : 'light';
     apply(next);
+    if (window.track) window.track('theme', { theme: next });
     try { localStorage.setItem('theme', next); } catch (e) { /* без хранилища — только до перезагрузки */ }
   });
 })();
