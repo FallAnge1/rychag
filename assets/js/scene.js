@@ -134,10 +134,11 @@
     // В превью на главной без фильтров: так легче для телефона.
     const grow = (i) => 0.86 + 0.3 * i;
     const muscleLayers = (shape, small, cls, i, uid) => {
-      const core = shape(`${cls} mu-core`, `opacity:${(0.2 + 0.68 * i).toFixed(3)}`, '');
-      const hi = i > 0.15 ? small('mu-hi', `opacity:${(0.26 * i).toFixed(3)}`, '') : '';
-      if (opt.mini || i < 0.04) return core + hi;
-      return shape(`${cls} mu-halo`, `opacity:${(0.85 * Math.pow(i, 1.1)).toFixed(3)}`, `filter="url(#glow-${uid})"`) + core + hi;
+      // заливка — градиент: светлая середина, насыщенные края
+      const key = (cls.match(/m\d/) || ['m1'])[0];
+      const core = shape(`${cls} mu-core`, `opacity:${(0.3 + 0.7 * i).toFixed(3)};fill:url(#mg-${key}-${uid})`, '');
+      if (opt.mini || i < 0.04) return core;
+      return shape(`${cls} mu-halo`, `opacity:${(0.9 * Math.pow(i, 1.1)).toFixed(3)}`, `filter="url(#glow-${uid})"`) + core;
     };
     D.muscleLens = (a, b, n, bulge, t0, t1, inset, cls, i, uid) => {
       const k = grow(i);
@@ -300,7 +301,10 @@
     svg.setAttribute('viewBox', vb);
     svg.classList.add('lp-scene');
     svg.innerHTML =
-      `<defs><filter id="glow-${uid}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="11"/></filter></defs>` +
+      `<defs><filter id="glow-${uid}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="11"/></filter>` +
+      ['m1', 'm2', 'm3'].map((m) => `<radialGradient id="mg-${m}-${uid}" cx="50%" cy="45%" r="62%">` +
+        `<stop offset="0" class="gs-hi ${m}"/><stop offset="0.55" class="gs ${m}"/><stop offset="1" class="gs-lo ${m}"/></radialGradient>`).join('') +
+      '</defs>' +
       `<g class="layer-static">${model.drawStatic ? model.drawStatic(ctx) : ''}</g>` +
       '<g class="layer-dyn"></g><g class="layer-notes" aria-hidden="true"></g><g class="layer-ctl"></g>';
     const dyn = svg.querySelector('.layer-dyn');
