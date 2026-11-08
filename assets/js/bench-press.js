@@ -3,7 +3,7 @@
    Грудь держит плечо, если кисть шире плеча; трицепс — если кисть внутри локтя. */
 (function (global) {
   'use strict';
-  const { DEG, v, add, sub, mul, norm, perp, clamp, lerp, comb, ik2, angleAt, makeView, len } = global.Bio;
+  const { DEG, v, add, sub, mul, norm, perp, cross, clamp, lerp, comb, ik2, angleAt, makeView, len } = global.Bio;
 
   const L = { upperArm: 0.3, foreArm: 0.27 };
   const W = { upperArm: 0.09, foreArm: 0.075 };
@@ -15,6 +15,7 @@
   const FLOOR = -0.62;
   const REACH = L.upperArm + L.foreArm - 0.005;
   const REF = 0.22 * BAR_KG * G / 2;
+  const PS_MAX = 25 * DEG;      // насколько можно сжимать или разводить гриф
 
   const VIEW = makeView(500, 382, 440);
   const yTop = (gw) => Math.sqrt(Math.max(REACH * REACH - (gw - SH) ** 2, 0.04));
@@ -34,10 +35,15 @@
     const R = arm(1, st.gw, y);
     const Lf = arm(-1, st.gw, y);
     const w = (BAR_KG * G) / 2;
-    const Ms = w * (R.Hd.x - R.S.x);   // грудь + передняя дельта
-    const Me = w * (R.E.x - R.Hd.x);   // трицепс
+    // толчок: ps > 0 — сжимаешь гриф (гриф давит на кисти наружу), ps < 0 — разводишь
+    const F = v(w * Math.tan(st.ps), -w);              // сила грифа на правую кисть
+    const Fdir = norm(F);
+    const Ms = -cross(sub(R.Hd, R.S), F);              // грудь + передняя дельта
+    const Me = cross(sub(R.Hd, R.E), F);               // трицепс
     return {
-      ...st, y, R, Lf, Ms, Me,
+      ...st, y, R, Lf, Ms, Me, Fdir, Fmag: len(F),
+      armS: Math.abs(cross(sub(R.Hd, R.S), Fdir)), armE: Math.abs(cross(sub(R.Hd, R.E), Fdir)),
+      push: v(-Fdir.x, -Fdir.y),
       elbow: angleAt(R.S, R.E, R.Hd),
       forearmTilt: Math.atan2(R.Hd.x - R.E.x, R.Hd.y - R.E.y),
       cI: clamp(Ms / REF, 0, 1), tI: clamp(Me / REF, 0, 1),
@@ -91,11 +97,16 @@
     out += D.bones([[R.S, R.E], [R.E, R.Hd], [Lf.S, Lf.E], [Lf.E, Lf.Hd]]);
     out += D.joints([R.S, R.E, Lf.S, Lf.E]);
     if (!mini) {
-      out += D.ln(v(R.Hd.x, r.y + 0.1), v(R.Hd.x, Math.min(R.E.y, R.S.y) - 0.12), 'fline');
-      out += D.lever(R.S, R.Hd, v(0, -1), R.Hd.x - R.S.x, 'm1', { labelOff: 0.045 });
-      out += D.lever(R.E, R.Hd, v(0, -1), R.E.x - R.Hd.x, 'm2', { labelOff: 0.045 });
+      const down = (r.y - Math.min(R.E.y, R.S.y) + 0.12) / -r.Fdir.y;
+      out += D.ln(comb(R.Hd, [r.Fdir, -0.1]), comb(R.Hd, [r.Fdir, down]), 'fline');
+      out += D.lever(R.S, R.Hd, r.Fdir, r.armS, 'm1', { labelOff: 0.045 });
+      out += D.lever(R.E, R.Hd, r.Fdir, r.armE, 'm2', { labelOff: 0.045 });
     }
-    for (const A of [R, Lf]) out += D.arrow(add(A.Hd, v(0, 0.05)), add(A.Hd, v(0, -0.22)), 'ar-force', 6);
+    // стрелки — твой толчок: на левой руке зеркально
+    for (const [A, sd] of [[R, 1], [Lf, -1]]) {
+      const p = v(sd * r.push.x, r.push.y);
+      out += D.arrow(comb(A.Hd, [p, 0.06]), comb(A.Hd, [p, 0.22]), 'ar-force', 6);
+    }
     out += D.arrow(v(0, -0.45), v(0, -0.22), 'ar-react', 6);
     return out;
   }
@@ -103,12 +114,15 @@
   const hp = {
     grip: (r) => v(r.R.Hd.x + 0.1, r.y),
     bar: (r) => v(0, r.y),
+    push: (r) => comb(r.R.Hd, [r.push, 0.26]),
   };
+  const pushText = (ps) => (ps > 4 * DEG ? 'сжимаешь гриф' : ps < -4 * DEG ? 'разводишь гриф' : 'давишь прямо вверх');
 
   function notes(r) {
     return [
       { lines: ['тяни: хват', 'уже / шире'], x: 800, y: 470, from: [850, 450], to: hp.grip(r), circle: 26, bend: 0.25 },
       { lines: ['тяни: штанга', 'вверх / вниз'], x: 30, y: 30, from: [160, 60], to: hp.bar(r), circle: 26, bend: -0.25 },
+      { lines: ['стрелка — твой толчок.', 'тяни: сжимай гриф', 'или разводи'], x: 740, y: 110, from: [740, 130], to: hp.push(r), circle: 26, bend: 0.3 },
       { lines: ['цветные отрезки —', 'плечи рычагов'], x: 690, y: 610, from: [700, 600], to: v((r.R.S.x + r.R.Hd.x) / 2, r.R.S.y), bend: -0.3, gap: 8 },
       { lines: ['светится —', 'значит работает'], x: 30, y: 560, from: [130, 545], to: v(-0.16, 0.0), bend: -0.3, gap: 8 },
       { lines: ['скамья держит спину'], x: 250, y: 680, from: [400, 660], toXY: [VIEW.x(v(-0.02, 0)), VIEW.y(v(0, -0.4))], bend: -0.3, gap: 6 },
@@ -130,6 +144,17 @@
       step: (st, dir, k) => { st.d -= dir * 0.03 * k; },
       value: (r) => ({ text: `штанга на ${Math.round((1 - r.d) * 100)}% от груди до верха`, now: (1 - r.d) * 100 }),
     },
+    {
+      key: 'push', label: 'Толчок: сжимать гриф или разводить',
+      pos: hp.push, axis: (r) => perp(r.push),
+      drag: (st, w) => {
+        const top = yTop(st.gw);
+        const d = sub(w, v(st.gw, lerp(top, Y_LOW, st.d)));
+        st.ps = Math.atan2(-d.x, d.y);
+      },
+      step: (st, dir, k) => { st.ps += dir * 2 * DEG * k; },
+      value: (r) => ({ text: pushText(r.ps), now: r.ps / DEG, min: -25, max: 25 }),
+    },
   ];
 
   const model = {
@@ -137,8 +162,8 @@
     viewBox: '0 0 1000 724',
     miniViewBox: '40 0 920 700',
     period: 3,
-    initial: () => ({ gw: 0.36, d: 0.55 }),
-    clamp(st) { st.gw = clamp(st.gw, GW_MIN, GW_MAX); st.d = clamp(st.d, 0, 1); },
+    initial: () => ({ gw: 0.36, d: 0.55, ps: 0 }),
+    clamp(st) { st.gw = clamp(st.gw, GW_MIN, GW_MAX); st.d = clamp(st.d, 0, 1); st.ps = clamp(st.ps || 0, -PS_MAX, PS_MAX); },
     solve, drawStatic, draw, notes, handles,
     phaseOf: (st) => Math.acos(clamp(1 - 2 * st.d, -1, 1)),
     animate(st, ph, { mini }) {
@@ -158,22 +183,29 @@
       set: (x) => ({ gw: GW_MIN + (x / 100) * (GW_MAX - GW_MIN) }),
     },
     presets: [
-      { label: 'Узкий хват', c: 'm2', state: { gw: 0.22, d: 0.7 } },
-      { label: 'Предплечья вертикально', c: 'm1', state: { gw: 0.4, d: 0.8 } },
-      { label: 'Сбросить', state: { gw: 0.36, d: 0.55 } },
+      { label: 'Узкий хват', c: 'm2', state: { gw: 0.22, d: 0.7, ps: 0 } },
+      { label: 'Предплечья вертикально', c: 'm1', state: { gw: 0.4, d: 0.8, ps: 0 } },
+      { label: 'Сжимай гриф', c: 'm1', state: { gw: 0.36, d: 0.6, ps: 20 * DEG } },
+      { label: 'Разводи гриф', c: 'm2', state: { gw: 0.36, d: 0.6, ps: -20 * DEG } },
+      { label: 'Сбросить', state: { gw: 0.36, d: 0.55, ps: 0 } },
     ],
     read(r) {
       const cm = (m) => Math.round(Math.abs(m) * 100) + ' см';
       const deg = (a) => Math.round(a / DEG) + '°';
-      const tilt = (r.R.Hd.x - r.R.E.x);
-      const forearm = Math.abs(tilt) < 0.025
-        ? '<b>Предплечья вертикальны.</b> Вес давит прямо вдоль них — локтю нечего сгибать, <b class="c-m2">трицепс</b> почти отдыхает.'
-        : tilt < 0
-          ? '<b>Кисти внутри локтей.</b> Вес сгибает локти — работает <b class="c-m2">трицепс</b>.'
-          : '<b>Кисти шире локтей.</b> Вес раскрывает руку наружу. Так руку держать неудобно — обычно локти сами уходят шире.';
+      const forearm = r.armE < 0.025
+        ? '<b>Сила идёт вдоль предплечий.</b> Локтю нечего сгибать — <b class="c-m2">трицепс</b> почти отдыхает.'
+        : r.Me > 0
+          ? '<b>Линия силы проходит внутри локтя.</b> Вес сгибает локти — работает <b class="c-m2">трицепс</b>.'
+          : '<b>Линия силы снаружи локтя.</b> Вес раскрывает руку наружу. Так руку держать неудобно — обычно локти сами уходят шире.';
       const chest = r.Ms < 0.05 * BAR_KG * G
-        ? 'Кисть почти над плечом — <b class="c-m1">груди</b> в этой плоскости нечего держать.'
-        : `Кисть на ${cm(r.R.Hd.x - r.R.S.x)} шире плеча — это плечо рычага для <b class="c-m1">груди</b>.`;
+        ? 'Линия силы проходит почти через плечо — <b class="c-m1">груди</b> в этой плоскости нечего держать.'
+        : `Линия силы проходит в ${cm(r.armS)} от плеча — это плечо рычага для <b class="c-m1">груди</b>.`;
+      const ps = r.ps / DEG;
+      const push = ps > 4
+        ? '<b>Сжимаешь гриф</b>, будто сводишь руки. Линия силы уходит от плеча — больше работает <b class="c-m1">грудь</b>, трицепсу легче.'
+        : ps < -4
+          ? '<b>Разводишь гриф</b>, будто хочешь его разорвать. Линия силы уходит от локтя — сильнее работает <b class="c-m2">трицепс</b>, груди легче.'
+          : 'Давишь <b>прямо вверх</b>, гриф не сжимаешь и не разводишь.';
       const depth = r.d > 0.85
         ? 'Внизу локти уходят ниже скамьи — грудь сильнее растянута.'
         : r.d < 0.15 ? 'Наверху руки почти прямые: плечи рычагов минимальны, держать вес легче всего.'
@@ -183,12 +215,12 @@
       return {
         loads: { c: r.Ms, t: r.Me },
         nums: [
-          ['Плечо у плечевого сустава', cm(r.R.Hd.x - r.R.S.x)],
-          ['Плечо у локтя', r.Me < 0 ? 'с другой стороны' : cm(r.R.E.x - r.R.Hd.x)],
+          ['Плечо у плечевого сустава', r.Ms < 0 ? 'с другой стороны' : cm(r.armS)],
+          ['Плечо у локтя', r.Me < 0 ? 'с другой стороны' : cm(r.armE)],
           ['Ширина хвата', Math.round(r.gw * 200) + ' см'],
           ['Угол в локте', deg(r.elbow)],
         ],
-        notes: [['m1', chest], ['m2', forearm], ['f', depth]],
+        notes: [['m1', chest], ['m2', forearm], ['f', push], ['f', depth]],
         warnings,
       };
     },

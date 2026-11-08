@@ -133,26 +133,27 @@
     // Напряжение i (0…1): мышца немного растёт и светится — но не забивает силуэт.
     // В превью на главной без фильтров: так легче для телефона.
     const grow = (i) => 0.86 + 0.3 * i;
-    const muscleLayers = (shape, small, cls, i, uid) => {
+    const muscleLayers = (shape, big, cls, i, uid) => {
       // заливка — градиент: светлая середина, насыщенные края
       const key = (cls.match(/m\d/) || ['m1'])[0];
       const core = shape(`${cls} mu-core`, `opacity:${(0.3 + 0.7 * i).toFixed(3)};fill:url(#mg-${key}-${uid})`, '');
       if (opt.mini || i < 0.04) return core;
-      return shape(`${cls} mu-halo`, `opacity:${(0.9 * Math.pow(i, 1.1)).toFixed(3)}`, `filter="url(#glow-${uid})"`) + core;
+      // ореол чуть больше мышцы: от её цвета к соседнему оттенку и в прозрачность
+      return big(`mu-halo`, `opacity:${(0.95 * Math.pow(i, 1.05)).toFixed(3)};fill:url(#mh-${key}-${uid})`, `filter="url(#glow-${uid})"`) + core;
     };
     D.muscleLens = (a, b, n, bulge, t0, t1, inset, cls, i, uid) => {
       const k = grow(i);
       const path = (d) => (c, style, extra) => `<path d="${d}" class="${c}" style="${style}" ${extra}/>`;
       return muscleLayers(
         path(D.lens(a, b, n, bulge * k, t0, t1, inset)),
-        path(D.lens(a, b, n, bulge * k * 0.45, t0 + 0.12, t1 + 0.12, inset + bulge * k * 0.1)),
+        path(D.lens(a, b, n, bulge * k * 1.7, Math.max(t0 - 0.06, 0), Math.max(t1 - 0.06, 0), inset - bulge * k * 0.25)),
         cls, i, uid);
     };
     D.muscleEll = (c, rx, ry, dir, cls, i, uid) => {
       const k = grow(i);
       return muscleLayers(
         (cl, style, extra) => D.ellipse(c, rx * k, ry * k, dir, cl, style, extra),
-        (cl, style, extra) => D.ellipse(c, rx * k * 0.42, ry * k * 0.42, dir, cl, style, extra),
+        (cl, style, extra) => D.ellipse(c, rx * k * 1.45, ry * k * 1.45, dir, cl, style, extra),
         cls, i, uid);
     };
 
@@ -303,7 +304,9 @@
     svg.innerHTML =
       `<defs><filter id="glow-${uid}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="11"/></filter>` +
       ['m1', 'm2', 'm3'].map((m) => `<radialGradient id="mg-${m}-${uid}" cx="50%" cy="45%" r="62%">` +
-        `<stop offset="0" class="gs-hi ${m}"/><stop offset="0.55" class="gs ${m}"/><stop offset="1" class="gs-lo ${m}"/></radialGradient>`).join('') +
+        `<stop offset="0" class="gs-hi ${m}"/><stop offset="0.55" class="gs ${m}"/><stop offset="1" class="gs-lo ${m}"/></radialGradient>` +
+        `<radialGradient id="mh-${m}-${uid}" cx="50%" cy="50%" r="50%">` +
+        `<stop offset="0" class="gs ${m}"/><stop offset="0.55" class="gh ${m}" stop-opacity="0.7"/><stop offset="1" class="gh ${m}" stop-opacity="0"/></radialGradient>`).join('') +
       '</defs>' +
       `<g class="layer-static">${model.drawStatic ? model.drawStatic(ctx) : ''}</g>` +
       '<g class="layer-dyn"></g><g class="layer-notes" aria-hidden="true"></g><g class="layer-ctl"></g>';
