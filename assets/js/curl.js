@@ -16,6 +16,8 @@
 
   const VIEW = makeView(330, 300, 520);
   const CH = { x: 640, y: 40, w: 330, h: 190 }; // график, координаты сцены
+  const CHM = { x: 100, y: 790, w: 560, h: 160 };                 // график под фигурой на телефоне
+  const box = (ctx) => (ctx && ctx.narrow ? CHM : CH);
 
   // Направление плеча: вниз, повернуть на alpha вперёд
   const udir = (al) => v(Math.sin(al), -Math.cos(al));
@@ -62,8 +64,8 @@
     ]]);
   }
 
-  function chart(r) {
-    const { x, y, w, h } = CH;
+  function chart(r, B) {
+    const { x, y, w, h } = B;
     const max = REF * 1.02;
     const px = (t) => x + 34 + ((t - TH_MIN) / (TH_MAX - TH_MIN)) * (w - 50);
     const py = (m) => y + h - 30 - (m / max) * (h - 60);
@@ -78,7 +80,8 @@
       `<circle cx="${px(r.th).toFixed(1)}" cy="${py(r.Mb).toFixed(1)}" r="8" class="chart-dot"/>`;
   }
 
-  function draw(r, { D, uid, mini }) {
+  function draw(r, ctx) {
+    const { D, uid, mini } = ctx;
     const { E, Hd, u, fd } = r;
     let n = perp(u);
     if (n.x * fd.x + n.y * fd.y < 0) n = mul(n, -1); // передняя сторона плеча
@@ -93,7 +96,7 @@
     if (!mini) {
       out += D.ln(v(Hd.x, Hd.y + 0.25), v(Hd.x, Math.min(Hd.y, E.y) - 0.25), 'fline');
       out += D.lever(E, Hd, v(0, -1), r.armB, 'm1', { labelOff: 0.05 });
-      out += chart(r);
+      out += chart(r, box(ctx));
     }
     out += D.arrow(add(Hd, v(0, -0.06)), add(Hd, v(0, -0.3)), 'ar-force', 6);
     return out;
@@ -104,12 +107,12 @@
     elbow: (r) => add(r.E, mul(r.u, 0.0)),
   };
 
-  function notes(r) {
+  function notes(r, ctx) {
     return [
       { lines: ['тяни: гантель', '(сгибай руку)'], x: 700, y: 345, from: [705, 365], to: hp.db(r), circle: 26, bend: 0.3 },
       { lines: ['тяни: локоть', 'вперёд / назад'], x: 30, y: 560, from: [130, 545], to: hp.elbow(r), circle: 26, bend: -0.3 },
       { lines: ['цветной отрезок —', 'плечо рычага у локтя'], x: 640, y: 560, from: [660, 545], to: v((r.E.x + r.Hd.x) / 2, r.E.y), bend: 0.3, gap: 8 },
-      { lines: ['график: где тяжелее всего.', 'точка — ты сейчас'], x: 640, y: 258, from: null },
+      { lines: ['график: где тяжелее всего.', 'точка — ты сейчас'], x: box(ctx).x, y: box(ctx).y - 22, from: null },
       { lines: ['светится —', 'значит работает'], x: 30, y: 40, from: [110, 70], to: comb(r.E, [r.u, -0.12]), bend: 0.25, gap: 8 },
     ];
   }
@@ -141,6 +144,7 @@
     view: VIEW,
     viewBox: '0 0 1000 724',
     miniViewBox: '40 20 680 600',
+    mobileViewBox: '80 40 600 920',
     period: 3,
     initial: () => ({ al: 0, th: 80 * DEG }),
     clamp(st) { st.al = clamp(st.al, AL_MIN, AL_MAX); st.th = clamp(st.th, TH_MIN, TH_MAX); },

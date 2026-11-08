@@ -3,7 +3,7 @@
    Таз уходит назад, чтобы общий центр масс остался над серединой стопы. */
 (function (global) {
   'use strict';
-  const { DEG, v, add, sub, mul, norm, perp, clamp, lerp, comb, ik2, makeView } = global.Bio;
+  const { DEG, v, add, sub, mul, norm, perp, clamp, lerp, comb, ik2, armIK, makeView } = global.Bio;
 
   const L = { shank: 0.43, thigh: 0.45, torso: 0.52, upperArm: 0.3, foreArm: 0.27 };
   const G = 9.81;
@@ -59,9 +59,7 @@
     const psi = (lo + hi) / 2;
     const P = pose(st.tau, st.g, psi);
     const { H, td, Sh, bar, tc } = P;
-    const e1 = ik2(Sh, bar, L.upperArm, L.foreArm, 1);
-    const e2 = ik2(Sh, bar, L.upperArm, L.foreArm, -1);
-    const E = e1.x < e2.x ? e1 : e2;
+    const E = armIK(Sh, bar, L.upperArm, L.foreArm, td, P.front);
     const Wb = M.bar * G, Wu = M.upper * G;
     const Mh = Wb * (bar.x - H.x) + Wu * (tc.x - H.x);              // ягодичные + бицепс бедра
     const Lp = add(H, mul(td, 0.12));
@@ -81,7 +79,7 @@
   function draw(r, { D, uid, mini }) {
     const { H, S, td, back, front, Sh, E, bar } = r;
     const head = comb(S, [td, 0.17], [back, -0.03]);
-    let out = D.circ(bar, D.px(0.225), 'm-weight') + D.circ(bar, D.px(0.03), 'm-hub');
+    let out = D.farLeg(H, K, A, (a) => D.footFlat(a, FLOOR)) + D.circ(bar, D.px(0.225), 'm-weight') + D.circ(bar, D.px(0.03), 'm-hub');
     out += D.figure([
       [D.part('thigh', H, K, v(1, 0)), D.part('shank', K, A, D.away(K, A, H)), D.footFlat(A, FLOOR)],
       [D.part('torso', comb(H, [td, -0.02]), S, front), D.part('neck', S, comb(S, [td, 0.12]), front), D.head(head, td, front)],

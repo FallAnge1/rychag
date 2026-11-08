@@ -3,7 +3,7 @@
    Вес делится между двумя опорами, как на рычажных весах. */
 (function (global) {
   'use strict';
-  const { DEG, v, add, sub, mul, norm, perp, fromAngle, clamp, comb, ik2, angleAt, makeView, len } = global.Bio;
+  const { DEG, v, add, sub, mul, norm, perp, fromAngle, clamp, comb, ik2, armIK, angleAt, makeView, len } = global.Bio;
 
   const L = { thigh: 0.45, shank: 0.43, torso: 0.45, headR: 0.1, upperArm: 0.3, foreArm: 0.27 };
   const W = { torso: 0.25, neck: 0.08, thigh: 0.165, shank: 0.115, upperArm: 0.085, foreArm: 0.07 };
@@ -65,10 +65,8 @@
     const up = perp(mul(dirHB, -1));        // сторона живота
     const head = comb(S, [dirHB, 0.17], [up, 0.03]);
     const sh = comb(S, [dirHB, -0.02]);
-    const e1 = ik2(sh, bar, L.upperArm, L.foreArm, 1);
-    const e2 = ik2(sh, bar, L.upperArm, L.foreArm, -1);
-    const elbow = e1.y > e2.y ? e1 : e2;
-    let out = D.circ(bar, D.px(0.225), 'm-weight') + D.circ(bar, D.px(0.03), 'm-hub');
+    const elbow = armIK(sh, bar, L.upperArm, L.foreArm, dirHB, up);
+    let out = D.farLeg(H, K, A, (a) => D.footFlat(a, FLOOR), v(-0.05, 0)) + D.circ(bar, D.px(0.225), 'm-weight') + D.circ(bar, D.px(0.03), 'm-hub');
     out += D.figure([
       [D.part('upperArm', sh, elbow, D.toward(sh, elbow, bar)), D.part('foreArm', elbow, bar, D.toward(elbow, bar, sh)), D.disc(bar, 0.042)],
       [D.part('torso', H, S, up), D.part('neck', S, comb(S, [dirHB, 0.12]), up), D.head(head, dirHB, up)],

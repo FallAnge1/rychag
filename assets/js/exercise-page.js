@@ -8,7 +8,14 @@
   const svg = $('scene');
 
   const penList = $('penNotes');
-  const api = window.Scene.mount(svg, ex.model, { interactive: true, notesList: penList });
+  // Пометки сами прячутся, как только человек начинает двигать модель
+  let autoHidden = false;
+  const autoHide = () => {
+    if (autoHidden) return;
+    autoHidden = true;
+    if (!svg.classList.contains('notes-off')) setNotes(true);
+  };
+  const api = window.Scene.mount(svg, ex.model, { interactive: true, notesList: penList, onInteract: autoHide });
 
   // ── Пометки на картинке: показать / скрыть ─────────────────────
   const toggle = $('notesToggle');
@@ -20,10 +27,11 @@
     svg.classList.toggle('notes-off', off);
     penList.classList.toggle('is-off', off);
     toggle.setAttribute('aria-pressed', String(!off));
-    toggle.querySelector('span').textContent = off ? 'Показать подсказки' : 'Скрыть подсказки';
+    toggle.querySelector('span').textContent = off ? 'Подсказки' : 'Скрыть';
   }
   setNotes(store.get());
   toggle.addEventListener('click', () => {
+    autoHidden = true; // человек сам решил — больше не прячем за него
     const off = !svg.classList.contains('notes-off');
     setNotes(off);
     store.set(off);
@@ -41,7 +49,7 @@
   slider.style.setProperty('--r', `var(--${sl.rc})`);
   slider.setAttribute('aria-label', `${sl.label}: от «${sl.left}» до «${sl.right}»`);
   let sliding = false;
-  slider.addEventListener('input', () => { sliding = true; api.set(sl.set(+slider.value)); });
+  slider.addEventListener('input', () => { sliding = true; autoHide(); api.set(sl.set(+slider.value)); });
   slider.addEventListener('change', () => { sliding = false; });
 
   // ── Повторения ──────────────────────────────────────────────────

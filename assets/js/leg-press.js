@@ -5,7 +5,7 @@
   'use strict';
   const {
     DEG, v, add, sub, mul, dot, cross, len, norm, perp, fromAngle, clamp, comb,
-    ik2, angleAt, project, makeView,
+    ik2, armIK, angleAt, project, makeView,
   } = global.Bio;
 
   // ── Тело, м ──────────────────────────────────────────────────────
@@ -127,15 +127,14 @@
     const { C, A, K, S } = r;
     const head = comb(S, [TD, 0.18], [BACK, 0.01]);
     const shoulder = comb(HIP, [TD, 0.44], [BACK, -0.03]);
-    const e1 = ik2(shoulder, HANDLE, BODY.upperArm, BODY.foreArm, 1);
-    const e2 = ik2(shoulder, HANDLE, BODY.upperArm, BODY.foreArm, -1);
-    const elbow = dot(e1, NB) > dot(e2, NB) ? e1 : e2;
+    const elbow = armIK(shoulder, HANDLE, BODY.upperArm, BODY.foreArm, TD, NB);
     const foot = [
       comb(C, [T, -0.085], [U, -0.005]), comb(C, [T, 0.06]), comb(C, [T, 0.155], [U, -0.01]),
       comb(C, [T, 0.14], [U, -0.045]), comb(A, [T, 0.06], [U, 0.01]), comb(A, [T, 0.0], [U, -0.035]),
       comb(A, [T, -0.05]), comb(C, [T, -0.1], [U, -0.04]),
     ];
-    return D.figure([
+    const off = comb(v(0, 0), [T, 0.035], [U, -0.01]);
+    return D.farLeg(HIP, K, A, () => D.blob(foot.map((p) => add(p, off))), off) + D.figure([
       [D.part('torso', comb(HIP, [TD, -0.02]), S, NB), D.part('neck', S, comb(S, [TD, 0.13]), NB), D.head(head, TD, NB)],
       [D.part('upperArm', shoulder, elbow, D.toward(shoulder, elbow, HANDLE)),
         D.part('foreArm', elbow, HANDLE, D.toward(elbow, HANDLE, shoulder)), D.disc(HANDLE, 0.042)],

@@ -3,7 +3,7 @@
    при котором общий центр масс остаётся над серединой стопы. */
 (function (global) {
   'use strict';
-  const { DEG, v, add, sub, mul, norm, perp, fromAngle, clamp, lerp, comb, ik2, angleAt, makeView } = global.Bio;
+  const { DEG, v, add, sub, mul, norm, perp, fromAngle, clamp, lerp, comb, ik2, armIK, angleAt, makeView } = global.Bio;
 
   const L = { shank: 0.43, thigh: 0.45, torso: 0.52, headR: 0.1, upperArm: 0.3, foreArm: 0.27 };
   const W = { torso: 0.25, neck: 0.08, thigh: 0.165, shank: 0.115, upperArm: 0.085, foreArm: 0.07 };
@@ -73,10 +73,11 @@
     const { K, H, S, td, back, bar } = r;
     const head = comb(S, [td, 0.17], [back, -0.02]);
     const sh = comb(H, [td, 0.44], [back, -0.02]);
-    const e1 = ik2(sh, bar, L.upperArm, L.foreArm, 1);
-    const e2 = ik2(sh, bar, L.upperArm, L.foreArm, -1);
+    // руки разведены шире плеч, поэтому в профиль локоть смотрит вниз-назад
+    const e1 = ik2(sh, bar, L.upperArm, L.foreArm, 1), e2 = ik2(sh, bar, L.upperArm, L.foreArm, -1);
     const elbow = e1.y < e2.y ? e1 : e2;
     let out = '';
+    out += D.farLeg(H, K, A, (a) => D.footFlat(a, FLOOR));
     // штанга (блин) — позади тела
     out += D.circ(bar, D.px(0.225), 'm-weight') + D.circ(bar, D.px(0.03), 'm-hub');
     const front = mul(back, -1);

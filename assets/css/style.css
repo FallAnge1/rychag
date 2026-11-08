@@ -12,6 +12,8 @@
   --m3: #ffb43a;          /* янтарный: поясница, бицепс бедра */
   --body: #3a3a42;
   --body-edge: #5d5d67;
+  --body-far: #26262c;
+  --body-far-edge: #3a3a42;
   --machine: #2e2e34;
   --machine-fill: #1a1a1e;
   --pad: #44444c;
@@ -37,6 +39,8 @@
   --m3: #f09000;
   --body: #cfcfca;
   --body-edge: #a3a39d;
+  --body-far: #b4b4ae;
+  --body-far-edge: #9a9a94;
   --machine: #d6d6d1;
   --machine-fill: #ececea;
   --pad: #b9b9b4;
@@ -98,6 +102,7 @@ button { font: inherit; color: inherit; }
 @media (max-width: 920px) { .ex-grid { grid-template-columns: 1fr; gap: 28px; } }
 
 .scene-box {
+  position: relative;
   border-radius: 24px; border: 1px solid var(--line); overflow: hidden;
   background-color: var(--scene-bg);
   background-image: radial-gradient(var(--grid-dot) 1.2px, transparent 1.4px);
@@ -201,6 +206,8 @@ input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius
 /* тело — один спокойный силуэт */
 .b-sil { fill: var(--body); }
 .b-rim { fill: none; stroke: var(--body-edge); stroke-width: 3px; stroke-linejoin: round; }
+.far .b-sil { fill: var(--body-far); }
+.far .b-rim { stroke: var(--body-far-edge); }
 .b-sep { fill: none; stroke: var(--scene-bg); stroke-width: 7px; stroke-linejoin: round; }
 .bone { display: none; }
 .joint { fill: var(--ink); stroke: none; r: 4px; opacity: 0.55; }
@@ -219,7 +226,7 @@ input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius
 .lever.m3 { stroke: var(--m3); }
 .lever.neg { stroke-dasharray: 2 6; opacity: 0.5; }
 .ra { fill: none; stroke: var(--ink); stroke-width: 1.2; opacity: 0.35; }
-.lever-lbl { font: 700 14px "Manrope", sans-serif; paint-order: stroke; stroke: var(--scene-bg); stroke-width: 5px; stroke-linejoin: round; }
+.lever-lbl { font: 700 11px "Manrope", sans-serif; paint-order: stroke; stroke: var(--scene-bg); stroke-width: 4px; stroke-linejoin: round; opacity: 0.9; }
 .lever-lbl.m1 { fill: var(--m1); }
 .lever-lbl.m2 { fill: var(--m2); }
 .lever-lbl.m3 { fill: var(--m3); }
@@ -235,6 +242,10 @@ input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius
 .chart-axis { stroke: var(--muted); stroke-width: 1.2; opacity: 0.5; }
 .chart-curve { fill: none; stroke: var(--m1); stroke-width: 3; stroke-linejoin: round; }
 .chart-dot { fill: var(--m1); stroke: var(--scene-bg); stroke-width: 3; }
+.chart-curve.m2 { stroke: var(--m2); }
+.chart-dot.m2 { fill: var(--m2); }
+.chart-curve.m3 { stroke: var(--m3); }
+.chart-dot.m3 { fill: var(--m3); }
 .chart-lbl { fill: var(--muted); font: 600 13px "Manrope", sans-serif; }
 
 /* ручки */
@@ -282,13 +293,29 @@ input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius
 .foot { padding: 56px 0 34px; color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
 @media (max-width: 600px) {
-  .lever-lbl { font-size: 28px; stroke-width: 8px; }
+  .lever-lbl { font-size: 17px; stroke-width: 5px; }
   .m-kg { font-size: 24px; }
   .share b { font-size: 40px; }
   .shares.n3 .share b { font-size: 28px; }
   .m-base, .m-frame, .m-grip { stroke-width: 5px; }
+  .chart-lbl { font-size: 22px; }
+  .chart-curve { stroke-width: 5; }
+  .chart-axis { stroke-width: 2; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Кнопка подсказок в углу картинки */
+.notes-btn {
+  position: absolute; top: 12px; right: 12px; z-index: 2;
+  display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px 9px 12px;
+  border-radius: 99px; border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.5);
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+.notes-btn:active { transform: scale(0.96); }
+.notes-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.notes-btn[aria-pressed="false"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+@media (max-width: 600px) { .notes-btn { top: 8px; right: 8px; padding: 8px 12px 8px 10px; } }

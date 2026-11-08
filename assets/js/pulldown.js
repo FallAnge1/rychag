@@ -3,7 +3,7 @@
    Отклоняешь корпус назад — тяга становится похожей на горизонтальную, работает середина спины. */
 (function (global) {
   'use strict';
-  const { DEG, v, add, sub, mul, dot, norm, perp, clamp, lerp, comb, ik2, cross, openingMoment, makeView, len } = global.Bio;
+  const { DEG, v, add, sub, mul, dot, norm, perp, clamp, lerp, comb, ik2, armIK, cross, openingMoment, makeView, len } = global.Bio;
 
   const L = { thigh: 0.45, shank: 0.43, torso: 0.52, upperArm: 0.3, foreArm: 0.27 };
   const G = 9.81;
@@ -31,9 +31,7 @@
     const hand = add(mul(top, 1 - st.p), mul(chest, st.p));
     const dir = norm(sub(P, hand));                      // куда трос тянет руки
     const F = mul(dir, T);
-    const e1 = ik2(Sh, hand, L.upperArm, L.foreArm, 1);
-    const e2 = ik2(Sh, hand, L.upperArm, L.foreArm, -1);
-    const E = e1.y < e2.y ? e1 : e2;
+    const E = armIK(Sh, hand, L.upperArm, L.foreArm, td, front);
     const Ms = Math.max(openingMoment(Sh, H, hand, F), 0);   // трос задирает руку — держит спина
     const Mb = Math.max(openingMoment(E, Sh, hand, F), 0);   // бицепс
     // Насколько тяга идёт вдоль корпуса (широчайшие) или поперёк (середина спины)

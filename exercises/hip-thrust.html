@@ -32,6 +32,10 @@
         <section class="stage" aria-label="Модель упражнения">
           <div class="scene-box">
             <svg id="scene" role="group" aria-label="Человек выполняет ягодичный мост со штангой, вид сбоку"></svg>
+            <button class="notes-btn" id="notesToggle" type="button" aria-pressed="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/><path d="M14 6l3 3"/></svg>
+              <span>Скрыть подсказки</span>
+            </button>
           </div>
           <ol class="pen-notes" id="penNotes" hidden></ol>
           <div class="stage-bar">
@@ -44,12 +48,6 @@
               <input type="range" id="ctl" min="0" max="100" step="0.5" value="50">
               <div class="range-labels"><span id="ctlLeft"></span><span id="ctlRight"></span></div>
             </div>
-          </div>
-          <div class="stage-foot">
-            <button class="chip" id="notesToggle" type="button" aria-pressed="true">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/><path d="M14 6l3 3"/></svg>
-              <span>Скрыть подсказки</span>
-            </button>
           </div>
         </section>
 

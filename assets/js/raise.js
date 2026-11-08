@@ -14,6 +14,8 @@
 
   const VIEW = makeView(500, 290, 420);
   const CH = { x: 690, y: 440, w: 290, h: 190 };
+  const CHM = { x: 180, y: 800, w: 640, h: 170 };                 // график под фигурой на телефоне
+  const box = (ctx) => (ctx && ctx.narrow ? CHM : CH);
 
   function arm(side, th, phi) {
     const S = v(side * SH, 0);
@@ -48,8 +50,8 @@
     ]]);
   }
 
-  function chart(r) {
-    const { x, y, w, h } = CH;
+  function chart(r, B) {
+    const { x, y, w, h } = B;
     const max = REF * 1.02;
     const px = (a) => x + 30 + (a / TH_MAX) * (w - 44);
     const py = (m) => y + h - 30 - (m / max) * (h - 56);
@@ -65,7 +67,8 @@
       `<circle cx="${px(r.th).toFixed(1)}" cy="${py(r.Md).toFixed(1)}" r="8" class="chart-dot"/>`;
   }
 
-  function draw(r, { D, uid, mini }) {
+  function draw(r, ctx) {
+    const { D, uid, mini } = ctx;
     let out = '';
     // мышцы под руками: трапеция и дельта на плечах
     for (const A of [r.R, r.Lf]) {
@@ -86,7 +89,7 @@
     if (!mini) {
       out += D.ln(v(r.R.Hd.x, r.R.Hd.y + 0.2), v(r.R.Hd.x, Math.min(r.R.Hd.y, 0) - 0.3), 'fline');
       out += D.lever(r.R.S, r.R.Hd, v(0, -1), r.arm, 'm1', { labelOff: 0.05 });
-      out += chart(r);
+      out += chart(r, box(ctx));
     }
     for (const A of [r.R, r.Lf]) out += D.arrow(add(A.Hd, v(0, -0.07)), add(A.Hd, v(0, -0.28)), 'ar-force', 5);
     return out;
@@ -94,12 +97,12 @@
 
   const hp = { db: (r) => add(r.R.Hd, mul(r.R.u, 0.12)) };
 
-  function notes(r) {
+  function notes(r, ctx) {
     return [
       { lines: ['тяни: поднять', 'или опустить руку'], x: 760, y: 40, from: [800, 80], to: hp.db(r), circle: 26, bend: 0.3 },
       { lines: ['цветной отрезок —', 'плечо рычага'], x: 40, y: 40, from: [150, 80], to: v(r.R.S.x + r.arm / 2, 0), bend: -0.3, gap: 10 },
       { lines: ['светится —', 'значит работает'], x: 40, y: 330, from: [150, 340], to: add(r.Lf.S, mul(r.Lf.u, 0.06)), bend: 0.2, gap: 10 },
-      { lines: ['график: где тяжелее всего.', 'точка — ты сейчас'], x: 690, y: 420, from: null },
+      { lines: ['график: где тяжелее всего.', 'точка — ты сейчас'], x: box(ctx).x, y: box(ctx).y - 22, from: null },
     ];
   }
 
@@ -117,6 +120,7 @@
     view: VIEW,
     viewBox: '0 0 1000 724',
     miniViewBox: '120 60 760 660',
+    mobileViewBox: '150 110 700 880',
     period: 3,
     initial: () => ({ th: 70 * DEG, phi: 15 * DEG }),
     clamp(st) { st.th = clamp(st.th, 0, TH_MAX); st.phi = clamp(st.phi, 0, PHI_MAX); },

@@ -34,6 +34,13 @@
     return add(root, mul(fromAngle(ang), l1));
   }
 
+  // Локоть по анатомии: при сгибании кисть уходит вперёд, к передней стороне тела.
+  // up — куда смотрит голова вдоль корпуса, ant — куда смотрит грудь.
+  function armIK(sh, hand, l1, l2, up, ant) {
+    const sgn = Math.sign(cross(mul(up, -1), ant)) || 1;
+    return ik2(sh, hand, l1, l2, -sgn);
+  }
+
   // Угол в точке b между отрезками b→a и b→c (180° — прямая линия)
   function angleAt(a, b, c) {
     const u = norm(sub(a, b));
@@ -78,6 +85,6 @@
 
   global.Bio = {
     DEG, v, add, sub, mul, dot, cross, len, norm, perp, fromAngle, clamp, lerp, comb,
-    ik2, angleAt, project, openingMoment, makeView, svgPoint, reducedMotion,
+    ik2, armIK, angleAt, project, openingMoment, makeView, svgPoint, reducedMotion,
   };
 })(window);

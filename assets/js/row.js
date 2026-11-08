@@ -3,7 +3,7 @@
    чтобы общий центр масс остался над серединой стопы. */
 (function (global) {
   'use strict';
-  const { DEG, v, add, sub, mul, norm, perp, clamp, lerp, comb, ik2, angleAt, openingMoment, makeView } = global.Bio;
+  const { DEG, v, add, sub, mul, norm, perp, clamp, lerp, comb, ik2, armIK, angleAt, openingMoment, makeView } = global.Bio;
 
   const L = { shank: 0.43, thigh: 0.45, torso: 0.52, headR: 0.1, upperArm: 0.3, foreArm: 0.27 };
   const W = { torso: 0.25, neck: 0.08, thigh: 0.165, shank: 0.115, upperArm: 0.085, foreArm: 0.07 };
@@ -45,9 +45,7 @@
     const psi = (lo + hi) / 2;
     const P = pose(st.tau, st.p, psi);
     const { H, td, Sh, Hd, tc } = P;
-    const e1 = ik2(Sh, Hd, L.upperArm, L.foreArm, 1);
-    const e2 = ik2(Sh, Hd, L.upperArm, L.foreArm, -1);
-    const E = e1.y > e2.y ? e1 : e2;
+    const E = armIK(Sh, Hd, L.upperArm, L.foreArm, td, P.front);
     const Wb = M.bar * G;
     const Ms = Wb * (Sh.x - Hd.x);                         // широчайшие (разгибание плеча)
     const Mb = Math.max(openingMoment(E, Sh, Hd, v(0, -Wb)), 0); // бицепс
@@ -67,7 +65,7 @@
   function draw(r, { D, uid, mini }) {
     const { H, S, td, back, Sh, E, Hd } = r;
     const head = comb(S, [td, 0.17], [back, -0.03]);
-    let out = D.circ(Hd, D.px(0.225), 'm-weight') + D.circ(Hd, D.px(0.03), 'm-hub');
+    let out = D.farLeg(H, K, A, (a) => D.footFlat(a, FLOOR)) + D.circ(Hd, D.px(0.225), 'm-weight') + D.circ(Hd, D.px(0.03), 'm-hub');
     const front = mul(back, -1);
     out += D.figure([
       [D.part('thigh', H, K, D.away(H, K, A)), D.part('shank', K, A, D.away(K, A, H)), D.footFlat(A, FLOOR)],

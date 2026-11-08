@@ -106,10 +106,15 @@
       [-0.07, floorY - A.y + 0.004], [0.14, floorY - A.y], [0.215, floorY - A.y + 0.014], [0.18, floorY - A.y + 0.042],
       [0.065, 0.0], [0.03, 0.05], [-0.045, 0.045], [-0.088, floorY - A.y + 0.035],
     ].map(([x, y]) => v(A.x + dir * x, A.y + y)));
+    // Дальняя нога: тот же силуэт, чуть позади и темнее — чтобы было видно, что ног две
+    D.farLeg = (H, K, A, foot, off = v(-0.045, 0)) => {
+      const f = (p) => add(p, off);
+      return D.figure([[D.part('thigh', f(H), f(K), D.away(H, K, A)), D.part('shank', f(K), f(A), D.away(K, A, H)), foot(f(A))]], 'far');
+    };
     D.disc = (c, r) => D.head(c, v(0, 1), v(1, 0), r / 1.1);
     // Слои: внутри слоя всё сливается в один силуэт, между слоями — тонкий зазор
     // Порядок внутри слоя: зазор от предыдущего слоя → общий контур → заливка
-    D.figure = (layers) => '<g class="fig">' + layers.map((parts) =>
+    D.figure = (layers, cls = '') => `<g class="fig ${cls}">` + layers.map((parts) =>
       parts.map((d) => `<path d="${d}" class="b-sep"/>`).join('') +
       parts.map((d) => `<path d="${d}" class="b-rim"/>`).join('') +
       parts.map((d) => `<path d="${d}" class="b-sil"/>`).join('')).join('') + '</g>';
@@ -165,6 +170,20 @@
       const cm = Math.round(Math.abs(arm) * 100);
       return D.ln(J, foot, 'lever ' + cls + (arm < 0 ? ' neg' : '')) + ra +
         `<text x="${X(off)}" y="${f1(V.y(off) + 5)}" class="lever-lbl ${cls}" text-anchor="middle">${cm} см</text>`;
+    };
+
+    // График нагрузки по амплитуде (координаты сцены). c: 'm1' | 'm2' | 'm3'
+    D.chart = ({ x, y, w, h, title, left, right, curve, tMin, tMax, max, cur, c = 'm1' }) => {
+      const gx = (t) => x + 30 + ((t - tMin) / (tMax - tMin)) * (w - 44);
+      const gy = (m) => y + h - 30 - (Math.max(m, 0) / max) * (h - 56);
+      const pts = curve.map(([t, m]) => `${f1(gx(t))},${f1(gy(m))}`).join(' ');
+      return `<line x1="${x + 30}" y1="${y + h - 30}" x2="${x + w - 10}" y2="${y + h - 30}" class="chart-axis"/>` +
+        `<line x1="${x + 30}" y1="${y + 22}" x2="${x + 30}" y2="${y + h - 30}" class="chart-axis"/>` +
+        `<text x="${x + 30}" y="${y + 14}" class="chart-lbl">${title}</text>` +
+        `<text x="${x + 30}" y="${y + h - 10}" class="chart-lbl">${left}</text>` +
+        `<text x="${x + w - 10}" y="${y + h - 10}" class="chart-lbl" text-anchor="end">${right}</text>` +
+        `<polyline points="${pts}" class="chart-curve ${c}"/>` +
+        `<circle cx="${f1(gx(cur[0]))}" cy="${f1(gy(cur[1]))}" r="8" class="chart-dot ${c}"/>`;
     };
 
     // Вертикальная линия силы тяжести через точку (для свободных весов)
@@ -304,7 +323,7 @@
         const nextNs = clamp(620 / w, 1, 1.4);
         const nextNarrow = !!list && w < 560;
         if (Math.abs(next - hk) > 0.02 || Math.abs(nextNs - ns) > 0.02 || nextNarrow !== narrow) {
-          hk = next; ns = nextNs; narrow = nextNarrow;
+          hk = next; ns = nextNs; narrow = nextNarrow; ctx.narrow = narrow;
           // на телефоне кадр ближе к человеку
           vb = narrow && model.mobileViewBox ? model.mobileViewBox : model.viewBox;
           if (svg.getAttribute('viewBox') !== vb) svg.setAttribute('viewBox', vb);
