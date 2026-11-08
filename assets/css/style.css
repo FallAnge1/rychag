@@ -1,0 +1,294 @@
+/* ── Цвета: тёмная тема по умолчанию, светлая — по переключателю ── */
+:root {
+  --bg: #0c0c0e;
+  --card: #131316;
+  --scene-bg: #111114;
+  --ink: #f2f2f0;
+  --muted: #85857f;
+  --line: #26262b;
+  --grid-dot: rgba(255, 255, 255, 0.07);
+  --m1: #ff4d64;          /* красный: квадрицепсы, грудь, широчайшие, бицепс */
+  --m2: #5b8cff;          /* синий: ягодичные, трицепс, дельта */
+  --m3: #ffb43a;          /* янтарный: поясница, бицепс бедра */
+  --body: #3a3a42;
+  --body-edge: #5d5d67;
+  --machine: #2e2e34;
+  --machine-fill: #1a1a1e;
+  --pad: #44444c;
+  --react: #6a6a72;
+  --force: #f2f2f0;
+  --pen: #d2d2cd;
+  --handle: #f2f2f0;
+  --handle-ink: #0c0c0e;
+  --warn: #fb923c;
+  --focus: #5b8cff;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #f4f4f2;
+  --card: #fbfbfa;
+  --scene-bg: #fbfbfa;
+  --ink: #111112;
+  --muted: #85857f;
+  --line: #e2e2de;
+  --grid-dot: rgba(17, 17, 18, 0.1);
+  --m1: #f2273f;
+  --m2: #2c63f0;
+  --m3: #f09000;
+  --body: #cfcfca;
+  --body-edge: #a3a39d;
+  --machine: #d6d6d1;
+  --machine-fill: #ececea;
+  --pad: #b9b9b4;
+  --react: #a3a39e;
+  --force: #111112;
+  --pen: #3c3c3a;
+  --handle: #111112;
+  --handle-ink: #f4f4f2;
+  --warn: #c2410c;
+  --focus: #2c63f0;
+  color-scheme: light;
+}
+
+/* ── База ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.55 "Manrope", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-weight: 700; letter-spacing: -0.035em; line-height: 1.05; margin: 0; }
+p { margin: 0; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 6px; }
+
+.wrap { width: min(1160px, 100%); margin: 0 auto; padding: 0 28px; }
+@media (max-width: 600px) { .wrap { padding: 0 16px; } }
+
+/* ── Шапка ─────────────────────────────────────────────────────── */
+.top { display: flex; align-items: center; justify-content: space-between; padding: 26px 0 10px; }
+.logo { font-weight: 800; font-size: 18px; letter-spacing: -0.03em; text-decoration: none; display: inline-flex; align-items: center; gap: 9px; }
+.logo-mark { width: 22px; height: 22px; }
+.logo-mark line { stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
+.logo-mark circle { fill: var(--m1); }
+.logo-mark .m2 { fill: var(--m2); }
+.top nav { display: flex; gap: 22px; font-size: 14px; font-weight: 600; }
+.top nav a { text-decoration: none; color: var(--muted); }
+.top nav a:hover { color: var(--ink); }
+.top-right { display: flex; align-items: center; gap: 14px; }
+.theme-toggle { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); display: grid; place-items: center; cursor: pointer; color: var(--ink); }
+.theme-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.theme-toggle .i-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .i-sun { display: block; }
+:root[data-theme="light"] .theme-toggle .i-moon { display: none; }
+.c-m1 { color: var(--m1); }
+.c-m2 { color: var(--m2); }
+.c-m3 { color: var(--m3); }
+
+/* ── Страница упражнения ───────────────────────────────────────── */
+.ex-head { padding: 34px 0 26px; display: grid; gap: 10px; }
+.ex-head h1 { font-size: clamp(34px, 5.5vw, 56px); }
+.lead { color: var(--muted); font-size: 17px; max-width: 54ch; }
+
+.ex-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); gap: 40px; align-items: start; }
+@media (max-width: 920px) { .ex-grid { grid-template-columns: 1fr; gap: 28px; } }
+
+.scene-box {
+  border-radius: 24px; border: 1px solid var(--line); overflow: hidden;
+  background-color: var(--scene-bg);
+  background-image: radial-gradient(var(--grid-dot) 1.2px, transparent 1.4px);
+  background-size: 24px 24px; background-position: 12px 12px;
+}
+.stage-bar { display: flex; align-items: center; gap: 18px; padding: 18px 4px 6px; }
+.stage-foot { display: flex; justify-content: flex-end; padding: 4px 4px 0; }
+
+.btn-play {
+  flex: none; width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--ink); color: var(--bg); display: grid; place-items: center; transition: transform 0.15s ease;
+}
+.btn-play:active { transform: scale(0.94); }
+.btn-play svg { width: 16px; height: 16px; fill: currentColor; }
+.btn-play .i-pause { display: none; }
+.btn-play[aria-pressed="true"] .i-play { display: none; }
+.btn-play[aria-pressed="true"] .i-pause { display: block; }
+
+.push-ctl { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.push-ctl label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.range-labels { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; font-weight: 700; }
+.range-labels span:last-child { text-align: right; }
+
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 26px; background: transparent; margin: 0; cursor: pointer; }
+input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 99px; background: linear-gradient(90deg, var(--l, var(--m1)), var(--r, var(--m2))); }
+input[type="range"]::-moz-range-track { height: 4px; border-radius: 99px; background: linear-gradient(90deg, var(--l, var(--m1)), var(--r, var(--m2))); }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; margin-top: -8px; border-radius: 50%; background: var(--ink); border: 3px solid var(--bg); }
+input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--ink); border: 3px solid var(--bg); }
+
+/* Панель */
+.panel { display: grid; gap: 14px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 18px; }
+.summary { display: grid; gap: 14px; }
+.shares { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); gap: 12px; }
+.share { display: grid; gap: 4px; align-content: start; color: var(--c); font-size: 13px; font-weight: 700; line-height: 1.2; }
+.share b { font-size: 46px; font-weight: 800; letter-spacing: -0.05em; line-height: 0.95; font-variant-numeric: tabular-nums; }
+.share small { display: none; }
+.share:last-child:not(:first-child) { text-align: right; }
+.shares.n3 .share:nth-child(2) { text-align: center; }
+.shares.n3 .share b { font-size: 36px; }
+.split-bar { display: flex; height: 6px; gap: 3px; }
+.split-bar i { display: block; height: 100%; border-radius: 99px; transition: width 0.12s linear; }
+
+.notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; font-size: 16px; line-height: 1.5; }
+.note .dot { display: none; }
+.note b { font-weight: 700; }
+.warn { color: var(--warn); font-size: 15px; line-height: 1.5; }
+.warn strong { font-weight: 700; }
+.warn p + p { margin-top: 6px; }
+
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  border: 1px solid var(--line); background: transparent; border-radius: 99px; padding: 7px 13px;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.chip:hover { border-color: var(--ink); }
+.chip:active { transform: scale(0.97); }
+.chip[aria-pressed] { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); border-color: transparent; padding: 6px 4px; }
+.chip[aria-pressed]:hover { color: var(--ink); }
+.chip svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.more { padding-top: 14px; padding-bottom: 14px; }
+.more summary { cursor: pointer; list-style: none; font-size: 14px; font-weight: 600; color: var(--muted); display: flex; justify-content: space-between; }
+.more summary::-webkit-details-marker { display: none; }
+.more summary::after { content: "+"; font-size: 18px; line-height: 1; transition: transform 0.2s; }
+.more[open] summary::after { transform: rotate(45deg); }
+.more[open] summary { margin-bottom: 14px; }
+.nums { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin: 0 0 14px; }
+.nums div { display: grid; gap: 1px; }
+.nums dt { font-size: 12px; color: var(--muted); }
+.nums dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.notes-more { font-size: 14px; color: var(--muted); }
+.notes-more b { color: var(--ink); }
+
+/* Пояснения внизу */
+.explain { margin: 56px 0 10px; display: grid; max-width: 760px; border-top: 1px solid var(--line); }
+.explain details { border-bottom: 1px solid var(--line); }
+.explain summary { cursor: pointer; padding: 18px 0; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.explain summary::-webkit-details-marker { display: none; }
+.explain summary::after { content: "+"; font-size: 20px; color: var(--muted); transition: transform 0.2s; }
+.explain details[open] summary::after { transform: rotate(45deg); }
+.explain .body { padding: 0 0 20px; display: grid; gap: 10px; color: var(--muted); }
+.explain .body b { color: var(--ink); }
+
+/* ── Сцена SVG ─────────────────────────────────────────────────── */
+.lp-scene { display: block; width: 100%; height: auto; user-select: none; -webkit-user-select: none; }
+
+/* тренажёры — тонкие линии */
+.m-base, .m-frame, .m-rail, .m-sled, .m-grip { stroke: var(--machine); stroke-width: 3px; stroke-linecap: round; fill: none; }
+.m-base { stroke-width: 2px; }
+.m-rail, .m-sled { stroke-width: 5px; }
+.m-pad { stroke: var(--pad); stroke-width: 14px; stroke-linecap: round; }
+.m-plate { stroke: var(--pad); stroke-width: 10px; stroke-linecap: round; }
+.m-weight { fill: var(--machine-fill); stroke: var(--machine); stroke-width: 3px; }
+.m-hub { fill: var(--machine); }
+.m-kg { fill: var(--muted); font: 600 14px "Manrope", sans-serif; }
+.m-bench { fill: var(--machine-fill); stroke: var(--machine); stroke-width: 3px; }
+.mid-mark { fill: var(--muted); }
+.cable { stroke: var(--ink); stroke-width: 2px; opacity: 0.55; }
+
+/* тело — один спокойный силуэт */
+.b-sil { fill: var(--body); }
+.b-rim { fill: none; stroke: var(--body-edge); stroke-width: 3px; stroke-linejoin: round; }
+.b-sep { fill: none; stroke: var(--scene-bg); stroke-width: 7px; stroke-linejoin: round; }
+.bone { display: none; }
+.joint { fill: var(--ink); stroke: none; r: 4px; opacity: 0.55; }
+
+/* мышцы */
+.mu-m1 { fill: var(--m1); }
+.mu-m2 { fill: var(--m2); }
+.mu-m3 { fill: var(--m3); }
+
+
+/* силы и рычаги */
+.fline { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 5 7; opacity: 0.35; }
+.lever { stroke-width: 3; stroke-linecap: round; }
+.lever.m1 { stroke: var(--m1); }
+.lever.m2 { stroke: var(--m2); }
+.lever.m3 { stroke: var(--m3); }
+.lever.neg { stroke-dasharray: 2 6; opacity: 0.5; }
+.ra { fill: none; stroke: var(--ink); stroke-width: 1.2; opacity: 0.35; }
+.lever-lbl { font: 700 14px "Manrope", sans-serif; paint-order: stroke; stroke: var(--scene-bg); stroke-width: 5px; stroke-linejoin: round; }
+.lever-lbl.m1 { fill: var(--m1); }
+.lever-lbl.m2 { fill: var(--m2); }
+.lever-lbl.m3 { fill: var(--m3); }
+.arrow-line { stroke-linecap: round; }
+.ar-force .arrow-line { stroke: var(--force); }
+.ar-force .arrow-head { fill: var(--force); }
+.ar-react .arrow-line { stroke: var(--react); }
+.ar-react .arrow-head { fill: var(--react); }
+.press { fill: var(--react); opacity: 0.35; }
+
+/* график в сгибаниях */
+.chart-bg { fill: none; }
+.chart-axis { stroke: var(--muted); stroke-width: 1.2; opacity: 0.5; }
+.chart-curve { fill: none; stroke: var(--m1); stroke-width: 3; stroke-linejoin: round; }
+.chart-dot { fill: var(--m1); stroke: var(--scene-bg); stroke-width: 3; }
+.chart-lbl { fill: var(--muted); font: 600 13px "Manrope", sans-serif; }
+
+/* ручки */
+.ctl { cursor: grab; touch-action: none; outline: none; }
+.ctl.dragging, .is-dragging { cursor: grabbing; }
+.ctl-hit { fill: transparent; }
+.ctl-ring { fill: var(--handle); stroke: var(--scene-bg); stroke-width: 3; transition: r 0.15s; }
+.ctl:hover .ctl-ring, .ctl.dragging .ctl-ring { r: 24; }
+.ctl:focus-visible .ctl-ring { stroke: var(--focus); stroke-width: 4; }
+.ctl-glyph { stroke: var(--handle-ink); stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.ctl-pulse { fill: none; stroke: var(--handle); stroke-width: 1.5; opacity: 0; transform-box: fill-box; transform-origin: center; animation: pulse 2.6s ease-out infinite; }
+.is-dragging .ctl-pulse, .touched .ctl-pulse { animation: none; }
+@keyframes pulse { 0% { opacity: 0.4; transform: scale(0.8); } 100% { opacity: 0; transform: scale(1.5); } }
+
+/* пометки «ручкой» */
+.note-txt { fill: var(--pen); font: 600 calc(25px * var(--ns, 1)) "Caveat", "Comic Sans MS", cursive; paint-order: stroke; stroke: var(--scene-bg); stroke-width: 6px; stroke-linejoin: round; }
+.note-ln { fill: none; stroke: var(--pen); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: 0.75; }
+.note-num { fill: var(--pen); font: 700 38px "Caveat", cursive; paint-order: stroke; stroke: var(--scene-bg); stroke-width: 6px; }
+.layer-notes { pointer-events: none; transition: opacity 0.2s; }
+.notes-off .layer-notes { opacity: 0; }
+.pen-notes { margin: 14px 4px 0; padding: 0; list-style: none; counter-reset: pen; display: grid; gap: 3px; color: var(--pen); font: 600 21px/1.15 "Caveat", "Comic Sans MS", cursive; }
+.pen-notes li { counter-increment: pen; display: grid; grid-template-columns: 26px 1fr; gap: 6px; align-items: start; }
+.pen-notes li::before { content: counter(pen); width: 21px; height: 21px; border: 1.5px solid var(--pen); border-radius: 50%; display: grid; place-items: center; font-size: 15px; line-height: 1; margin-top: 1px; }
+.pen-notes.is-off { display: none; }
+
+/* ── Главная ───────────────────────────────────────────────────── */
+.hero { padding: 72px 0 56px; display: grid; gap: 18px; }
+.hero h1 { font-size: clamp(40px, 7.5vw, 84px); max-width: 13ch; }
+.hero h1 em { font-style: normal; background: linear-gradient(90deg, var(--m1), var(--m2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 20px; border-radius: 99px; background: var(--ink); color: var(--bg); text-decoration: none; font-weight: 700; font-size: 15px; width: fit-content; transition: transform 0.15s ease; }
+.btn:active { transform: scale(0.97); }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 28px 20px; padding-bottom: 20px; }
+.ex-card { display: grid; gap: 12px; text-decoration: none; }
+.ex-card .thumb {
+  aspect-ratio: 4 / 3; border-radius: 20px; border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; transition: transform 0.25s ease, border-color 0.2s;
+  background-color: var(--scene-bg); background-image: radial-gradient(var(--grid-dot) 1.2px, transparent 1.4px); background-size: 20px 20px;
+}
+.ex-card:hover .thumb { border-color: var(--muted); }
+.ex-card:hover .thumb { transform: translateY(-3px); }
+.ex-card .thumb svg { width: 100%; height: 100%; }
+.ex-card h3 { font-size: 19px; letter-spacing: -0.02em; }
+.ex-card .tags { font-size: 14px; color: var(--muted); }
+
+.foot { padding: 56px 0 34px; color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (max-width: 600px) {
+  .lever-lbl { font-size: 28px; stroke-width: 8px; }
+  .m-kg { font-size: 24px; }
+  .share b { font-size: 40px; }
+  .shares.n3 .share b { font-size: 28px; }
+  .m-base, .m-frame, .m-grip { stroke-width: 5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
