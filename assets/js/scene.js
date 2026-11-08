@@ -134,9 +134,10 @@
     // В превью на главной без фильтров: так легче для телефона.
     const grow = (i) => 0.86 + 0.3 * i;
     const muscleLayers = (shape, small, cls, i, uid) => {
-      const core = shape(`${cls} mu-core`, `opacity:${(0.16 + 0.64 * i).toFixed(3)}`, '');
-      if (opt.mini || i < 0.04) return core;
-      return shape(`${cls} mu-halo`, `opacity:${(0.6 * Math.pow(i, 1.3)).toFixed(3)}`, `filter="url(#glow-${uid})"`) + core;
+      const core = shape(`${cls} mu-core`, `opacity:${(0.2 + 0.68 * i).toFixed(3)}`, '');
+      const hi = i > 0.15 ? small('mu-hi', `opacity:${(0.26 * i).toFixed(3)}`, '') : '';
+      if (opt.mini || i < 0.04) return core + hi;
+      return shape(`${cls} mu-halo`, `opacity:${(0.85 * Math.pow(i, 1.1)).toFixed(3)}`, `filter="url(#glow-${uid})"`) + core + hi;
     };
     D.muscleLens = (a, b, n, bulge, t0, t1, inset, cls, i, uid) => {
       const k = grow(i);
@@ -299,7 +300,7 @@
     svg.setAttribute('viewBox', vb);
     svg.classList.add('lp-scene');
     svg.innerHTML =
-      `<defs><filter id="glow-${uid}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="8"/></filter></defs>` +
+      `<defs><filter id="glow-${uid}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="11"/></filter></defs>` +
       `<g class="layer-static">${model.drawStatic ? model.drawStatic(ctx) : ''}</g>` +
       '<g class="layer-dyn"></g><g class="layer-notes" aria-hidden="true"></g><g class="layer-ctl"></g>';
     const dyn = svg.querySelector('.layer-dyn');
